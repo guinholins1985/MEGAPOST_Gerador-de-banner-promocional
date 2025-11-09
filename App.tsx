@@ -28,17 +28,18 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100 font-sans">
-      <header className="bg-gray-800/50 backdrop-blur-sm border-b border-gray-700 p-4 shadow-lg">
-        <div className="container mx-auto max-w-7xl flex items-center gap-3">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-indigo-400" viewBox="0 0 20 20" fill="currentColor">
-            <path d="M5 4a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2V6a2 2 0 00-2-2H5zm10 1H5a1 1 0 00-1 1v6a1 1 0 001 1h10a1 1 0 001-1V6a1 1 0 00-1-1z" />
-            <path d="M6 8a.5.5 0 01.5-.5h7a.5.5 0 010 1h-7A.5.5 0 016 8zm0 2a.5.5 0 01.5-.5h4a.5.5 0 010 1h-4A.5.5 0 016 10z" />
-          </svg>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Gerador de Banners com IA</h1>
+      <header className="bg-gray-800/50 backdrop-blur-sm border-b border-gray-700 py-6 text-center shadow-lg">
+        <div className="container mx-auto max-w-7xl px-4">
+          <h1 className="text-3xl lg:text-4xl font-bold tracking-tight text-white">
+            Gerador de Banners Promocionais com IA
+          </h1>
+          <p className="mt-3 text-lg text-gray-400 max-w-3xl mx-auto">
+            Crie banners profissionais para marketplaces em segundos. Basta preencher as informações da sua campanha.
+          </p>
         </div>
       </header>
 
-      <main className="container mx-auto max-w-7xl p-4 lg:p-6">
+      <main className="container mx-auto max-w-7xl p-4 lg:p-6 mt-8">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
           <div className="lg:col-span-2">
             <BannerForm onGenerate={handleGenerateBanner} loading={loading} />
