@@ -52,7 +52,7 @@ ${options.productImage
 
 export const generateBanner = async (options: BannerOptions): Promise<string> => {
   if (!process.env.API_KEY) {
-    throw new Error("API key for Gemini is not configured.");
+    throw new Error("A chave da API do Gemini não foi configurada.");
   }
   
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
@@ -62,10 +62,17 @@ export const generateBanner = async (options: BannerOptions): Promise<string> =>
     const parts: any[] = [];
     
     if (options.productImage) {
+      const imageMatch = options.productImage.match(/^data:(image\/\w+);base64,(.*)$/s);
+      if (!imageMatch) {
+        throw new Error("A imagem do produto fornecida não é um formato de dados URI válido.");
+      }
+      const mimeType = imageMatch[1];
+      const data = imageMatch[2];
+
       parts.push({
         inlineData: {
-          mimeType: options.productImage.split(';')[0].split(':')[1], // e.g., 'image/png'
-          data: options.productImage.split(',')[1], // the base64 part
+          mimeType,
+          data,
         },
       });
     }
@@ -80,19 +87,28 @@ export const generateBanner = async (options: BannerOptions): Promise<string> =>
       },
     });
 
-    for (const part of response.candidates[0].content.parts) {
-      if (part.inlineData) {
-        const base64ImageBytes: string = part.inlineData.data;
-        return `data:${part.inlineData.mimeType};base64,${base64ImageBytes}`;
-      }
+    const candidate = response.candidates?.[0];
+    const imagePart = candidate?.content?.parts?.find(part => part.inlineData);
+
+    if (imagePart?.inlineData) {
+      const base64ImageBytes: string = imagePart.inlineData.data;
+      return `data:${imagePart.inlineData.mimeType};base64,${base64ImageBytes}`;
+    }
+    
+    const responseText = response.text?.trim();
+    if (responseText) {
+      throw new Error(`A IA retornou uma mensagem em vez de uma imagem: "${responseText}"`);
     }
 
-    throw new Error("A IA não retornou uma imagem válida. Tente ajustar suas opções.");
+    throw new Error("A IA não retornou uma imagem válida. A resposta pode ter sido bloqueada. Tente ajustar suas opções.");
 
   } catch (error) {
     console.error("Error calling Gemini API:", error);
-    if (error instanceof Error && (error.message.includes('SAFETY') || error.message.includes('400'))) {
-        throw new Error("A geração foi bloqueada por políticas de segurança ou por uma entrada inválida. Tente um prompt ou imagem diferente.");
+    if (error instanceof Error) {
+        if (error.message.includes('SAFETY') || error.message.includes('400')) {
+            throw new Error("Sua solicitação foi bloqueada por políticas de segurança ou por uma entrada inválida. Tente um prompt ou imagem diferente.");
+        }
+        throw error; // Re-throw other known errors
     }
     throw new Error("Falha ao se comunicar com a API de geração de imagem.");
   }
